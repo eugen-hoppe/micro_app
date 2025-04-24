@@ -44,14 +44,13 @@ class DB:
         self.session.refresh(payload)
         return payload
 
-    def read(self, table: type[Base], id_or_alias: int | str) -> Base | None:
+    def read(self, table: type[Base], id_or_alias: int | str) -> type[Base] | None:
+        def __select(table_, where_) -> ChunkedIteratorResult:
+            return self.session.execute(select(table_).where(where_))
         DB._check(self, Scope.READ)
-        stmt = select(table).where(
-            table.id == id_or_alias if isinstance(id_or_alias, int)
-            else table.alias == id_or_alias
-        )
-        result: ChunkedIteratorResult = self.session.execute(stmt)
-        return result.scalar_one_or_none()
+        if isinstance(id_or_alias, int):
+            return __select(table, table.id == id_or_alias).scalar_one_or_none()
+        return __select(table, table.alias == id_or_alias).scalar_one_or_none()
 
     def update(
         self,

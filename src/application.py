@@ -5,6 +5,7 @@ from sqlalchemy.orm.session import Session
 
 from src.db.generic import Base
 from src.apps.subscription.endpoints import subscription_api
+from src.apps.user.endpoints import user_api
 
 
 app = FastAPI(
@@ -24,6 +25,8 @@ Base.metadata.create_all(bind=engine)
 
 
 app.include_router(subscription_api, prefix="/api")
+app.include_router(user_api, prefix="/api")
+
 
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):
