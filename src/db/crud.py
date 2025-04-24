@@ -76,6 +76,8 @@ class DB:
         return __delete(table, table.alias == id_or_alias)
 
 
+# Dependencies
+# ============
 async def get_db(request: Request):
     session: SessionLocal = getattr(request.state, "db")
     try:
