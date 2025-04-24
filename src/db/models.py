@@ -4,14 +4,13 @@ from sqlalchemy.orm.properties import MappedColumn
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.schema import UniqueConstraint
 
-from src.db.categories import SubsriptionType
 from src.db.relations import Many, One
 
 
 class Base(DeclarativeBase):
     """Base class for all database models"""
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    alias = Column(String(64), unique=True, index=True)
+    alias = Column(String(64), unique=True, index=True, default=None)
     version = Column(Integer, default=1)
     data = Column(JSON, default=dict)
 
@@ -40,8 +39,6 @@ membership = Table(
 
 
 class Subscription(Base):
-    category: Mapped[SubsriptionType] = mapped_column(Enum(SubsriptionType))
-
     owner: Mapped["User"] = One.to_one().PLAN.entity()
     accounts: Mapped[list["Account"]] = Many.to_one().SUBSCRIPTION.entity()
     members: Mapped[list["User"]] = Many.to_many().MEMBERSHIPS.over(membership)

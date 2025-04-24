@@ -90,4 +90,3 @@ async def write(session: SessionLocal = Depends(get_db)) -> DB:
 
 async def read(session: SessionLocal = Depends(get_db)) -> DB:
     return DB(session)
-

@@ -1,10 +1,9 @@
 from src.db.generic import Shape, Data
-from src.db.categories import SubsriptionType
 
 
 class SubscriptionData(Data):
     year: int
-    category: SubsriptionType = SubsriptionType.STANDARD.value
+    category: str = "Standard Plan"
 
 
 class SubscriptionAPI(Shape):
