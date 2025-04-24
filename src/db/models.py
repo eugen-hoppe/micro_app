@@ -1,11 +1,8 @@
-from enum import auto
-
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import Mapped
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, Table
+from sqlalchemy.orm import Mapped, relationship, mapped_column
 from sqlalchemy.schema import UniqueConstraint
 
 from src.db.generic import Base
-from src.db.relations import Many, One
 
 
 # Many-To-Many
@@ -25,21 +22,46 @@ membership = Table(
 # DB Tables
 # =========
 class Subscription(Base):
-    owner: Mapped["User"] = One.to_one().PLAN.entity()
-    accounts: Mapped[list["Account"]] = Many.to_one().SUBSCRIPTION.entity()
-    members: Mapped[list["User"]] = Many.to_many().MEMBERSHIPS.over(membership)
+    owner: Mapped["User"] = relationship(
+        "User",
+        back_populates="plan",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    accounts: Mapped[list["Account"]] = relationship(
+        "Account",
+        back_populates="subscription",
+        cascade="all, delete-orphan",
+    )
+    members: Mapped[list["User"]] = relationship(
+        "User",
+        secondary=membership,
+        back_populates="memberships",
+    )
 
 
 class User(Base):
-    alias = Column(String(64), unique=True, index=True)
-    subscription_id: Mapped[int] = Base.foreign_key(Subscription.id)
-
-    plan: Mapped[Subscription] = One.to_one().OWNER.by(subscription_id)
-    memberships: Mapped[list[Subscription]] = Many.to_many().MEMBERS.over(membership)
+    subscription_id: Mapped[int] = mapped_column(
+        ForeignKey("subscription.id", ondelete="CASCADE")
+    )
+    plan: Mapped["Subscription"] = relationship(
+        "Subscription",
+        back_populates="owner",
+        uselist=False,
+    )
+    memberships: Mapped[list["Subscription"]] = relationship(
+        "Subscription",
+        secondary=membership,
+        back_populates="members",
+    )
 
 
 class Account(Base):
     active = Column(Boolean, default=False)
-    subscription_id: Mapped[int] = Base.foreign_key(Subscription.id)
-
-    subscription: Mapped[Subscription] = One.to_many().ACCOUNTS.by(subscription_id)
+    subscription_id: Mapped[int] = mapped_column(
+        ForeignKey("subscription.id", ondelete="CASCADE")
+    )
+    subscription: Mapped["Subscription"] = relationship(
+        "Subscription",
+        back_populates="accounts",
+    )

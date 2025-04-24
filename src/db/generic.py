@@ -1,13 +1,7 @@
-from enum import Enum
-
 from pydantic import BaseModel
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm.relationships import Relationship
-from sqlalchemy.orm.properties import MappedColumn
-from sqlalchemy.sql.schema import Table
-
-from sqlalchemy import JSON, Column, ForeignKey, Integer, String, Table
+from sqlalchemy import JSON, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase, mapped_column
+from sqlalchemy.orm.properties import MappedColumn
 from sqlalchemy.ext.declarative import declared_attr
 
 
@@ -60,32 +54,3 @@ class Update(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-# Relations
-# =========
-class EntityRelation(Enum):
-    @staticmethod
-    def back_populates(to: "Enum", kwargs: dict = {}) -> Relationship:
-        return relationship(**kwargs, back_populates=to.name.lower())
-
-    def by(self, column: MappedColumn) -> Relationship:
-        return EntityRelation.back_populates(self, kwargs={"foreign_keys": [column]})
-
-    def entity(self) -> Relationship:
-        return EntityRelation.back_populates(self)
-
-
-class ManyGeneric(Enum):
-    def over(self, table: Table) -> Relationship:
-        return EntityRelation.back_populates(self, kwargs={"secondary": table})
-
-
-class OneGeneric(Enum):
-    def by(self, column: MappedColumn) -> Relationship:
-        return EntityRelation.back_populates(
-            self, kwargs={"foreign_keys": [column], "uselist": False}
-        )
-
-    def entity(self) -> Relationship:
-        return EntityRelation.back_populates(self)
