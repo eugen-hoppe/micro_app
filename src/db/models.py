@@ -11,6 +11,7 @@ from src.db.relations import Many, One
 class Base(DeclarativeBase):
     """Base class for all database models"""
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    alias = Column(String(64), unique=True, index=True)
     version = Column(Integer, default=1)
     data = Column(JSON, default=dict)
 
@@ -24,6 +25,8 @@ class Base(DeclarativeBase):
         return mapped_column(ForeignKey(column, ondelete=ondelete))
 
 
+# Database Schema
+# ===============
 membership = Table(
     "membership",
     Base.metadata,
@@ -38,6 +41,7 @@ membership = Table(
 
 class Subscription(Base):
     category: Mapped[SubsriptionType] = mapped_column(Enum(SubsriptionType))
+
     owner: Mapped["User"] = One.to_one().PLAN.entity()
     accounts: Mapped[list["Account"]] = Many.to_one().SUBSCRIPTION.entity()
     members: Mapped[list["User"]] = Many.to_many().MEMBERSHIPS.over(membership)
@@ -46,6 +50,7 @@ class Subscription(Base):
 class User(Base):
     alias = Column(String(64), unique=True, index=True)
     subscription_id: Mapped[int] = Base.foreign_key(Subscription.id)
+
     plan: Mapped[Subscription] = One.to_one().OWNER.by(subscription_id)
     memberships: Mapped[list[Subscription]] = Many.to_many().MEMBERS.over(membership)
 
@@ -53,4 +58,5 @@ class User(Base):
 class Account(Base):
     active = Column(Boolean, default=False)
     subscription_id: Mapped[int] = Base.foreign_key(Subscription.id)
+
     subscription: Mapped[Subscription] = One.to_many().ACCOUNTS.by(subscription_id)
