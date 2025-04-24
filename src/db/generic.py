@@ -44,7 +44,7 @@ class Shape(BaseModel):
         from_attributes = True
 
     @classmethod
-    def from_db(cls, row):
+    def from_db(cls, row: type[Base]):
         return cls.model_validate(row, from_attributes=True)
 
 

@@ -36,7 +36,7 @@ async def create_subscription_and_user(
 ):
     with db.tx():
         subscription = Subscription(data=payload.to_dict())
-        owner = User(data={})
+        owner = User(data={"name": "John"})
         owner.plan = db.create(subscription)
         owner.alias = owner.plan.alias
         owner.memberships.append(subscription)
