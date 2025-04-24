@@ -3,6 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 
+from src.db.models import Base
+
 
 
 app = FastAPI(
@@ -16,4 +18,4 @@ sql_url = "sqlite:///./sql_app.db"
 engine = create_engine(url=sql_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
