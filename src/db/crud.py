@@ -11,6 +11,8 @@ from src.db.models import Base
 from src.db.generic import Update
 
 
+# CRUD
+# ====
 class Scope(Enum):
     READ = auto()
     WRITE = auto()

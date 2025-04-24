@@ -1,57 +1,41 @@
 from enum import auto
 
-from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy.orm.properties import MappedColumn
-from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
+from sqlalchemy.orm import Mapped
 from sqlalchemy.schema import UniqueConstraint
 
-from src.db.generic import OneToManyGeneric, ManyGeneric, OneGeneric
+from src.db.generic import EntityRelation, ManyGeneric, OneGeneric, Base
 
 
-class OneToMany(OneToManyGeneric):
-    SUBSCRIPTION = auto()  # . 1
-    ACCOUNTS = auto()  # .     n
-    # ACCCOUNT, ... add more
+# Relation Definition
+# ===================
+class ToOne(EntityRelation):
+    SUBSCRIPTION = auto()
+
+class ToMany(EntityRelation):
+    ACCOUNTS = auto()
 
 
 class Many(ManyGeneric):
-    MEMBERSHIPS = auto()  # . n
-    MEMBERS = auto()  # .     n
+    MEMBERSHIPS = auto()
+    MEMBERS = auto()
 
     @staticmethod
-    def to_one() -> "OneToMany":
-        return OneToMany
+    def to_one() -> "ToOne":
+        return ToOne
 
 
 class One(OneGeneric):
-    PLAN = auto()  # .  1
-    OWNER = auto()  # . 1
+    PLAN = auto()
+    OWNER = auto()
 
     @staticmethod
-    def to_many() -> "OneToMany":
-        return OneToMany
+    def to_many() -> "ToMany":
+        return ToMany
 
 
-class Base(DeclarativeBase):
-    """Base class for all database models"""
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    alias = Column(String(64), unique=True, index=True, default=None)
-    version = Column(Integer, default=1)
-    data = Column(JSON, default=dict)
-
-    @declared_attr
-    def __tablename__(cls: "Base") -> str:
-        return cls.__name__.lower()
-
-    @staticmethod
-    def foreign_key(column: Column, ondelete: str = "CASCADE") -> MappedColumn:
-        """Create a foreign key constraint on the given column"""
-        return mapped_column(ForeignKey(column, ondelete=ondelete))
-
-
-# Database Schema
-# ===============
+# Many-To-Many Relations
+# ======================
 membership = Table(
     "membership",
     Base.metadata,
@@ -64,6 +48,8 @@ membership = Table(
 )
 
 
+# Database Entities
+# =================
 class Subscription(Base):
     owner: Mapped["User"] = One.to_one().PLAN.entity()
     accounts: Mapped[list["Account"]] = Many.to_one().SUBSCRIPTION.entity()
