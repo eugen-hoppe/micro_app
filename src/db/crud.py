@@ -47,6 +47,7 @@ class DB:
     def read(self, table: type[Base], id_or_alias: int | str) -> type[Base] | None:
         def __select(table_, where_) -> ChunkedIteratorResult:
             return self.session.execute(select(table_).where(where_))
+
         DB._check(self, Scope.READ)
         if isinstance(id_or_alias, int):
             return __select(table, table.id == id_or_alias).scalar_one_or_none()
@@ -63,7 +64,8 @@ class DB:
         DB._check(self, Scope.WRITE)
         values = payload.model_dump(exclude_unset=True, exclude_none=True)
         condition = (
-            table.id == payload.id if payload.id is not None 
+            table.id == payload.id
+            if payload.id is not None
             else table.alias == payload.alias
         )
         self.session.execute(update(table).where(condition).values(**values))
@@ -78,7 +80,8 @@ class DB:
     ) -> None:
         DB._check(self, Scope.WRITE)
         condition = (
-            table.id == id_or_alias if isinstance(id_or_alias, int)
+            table.id == id_or_alias
+            if isinstance(id_or_alias, int)
             else table.alias == id_or_alias
         )
         self.session.execute(delete(table).where(condition))

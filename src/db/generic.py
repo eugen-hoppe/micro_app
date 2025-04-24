@@ -9,6 +9,7 @@ from sqlalchemy.ext.declarative import declared_attr
 # ========
 class Base(DeclarativeBase):
     """Base class for all database models"""
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     alias = Column(String(64), unique=True, index=True, default=None)
     version = Column(Integer, default=1)
