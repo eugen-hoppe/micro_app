@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello</title>
+</head>
+<body>
+    <h1>{{ greeting }}</h1>
+    <button
+        hx-get="/users"
+        hx-swap="innerHTML"
+        hx-target="#user_list"
+    >
+        Load Data
+    </button>
+    <div id="user_list"></div>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+</body>
+</html>

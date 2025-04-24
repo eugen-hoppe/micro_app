@@ -1,4 +1,4 @@
 SQLAlchemy==2.0.40
 alembic==1.15.2
 fastapi[standard]==0.115.12
-# sqlmodel==0.0.24
+fastapi-htmx==0.5.0

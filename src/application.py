@@ -6,6 +6,7 @@ from sqlalchemy.orm.session import Session
 from src.db.generic import Base
 from src.apps.subscription.endpoints import subscription_api
 from src.apps.user.endpoints import user_api
+from src.apps.web import web_app
 from src.settings.conf import DATABASE_URL, PREFIX
 
 
@@ -26,6 +27,7 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(subscription_api, prefix=PREFIX)
 app.include_router(user_api, prefix=PREFIX)
+app.include_router(web_app)
 
 
 @app.middleware("http")
