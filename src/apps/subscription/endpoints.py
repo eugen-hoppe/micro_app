@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from src.apps.subscription.models import SubscriptionAPI, SubscriptionData
-from src.db.models import Subscription
+from src.db.models import Subscription, User
 from src.db.crud import DB, write
 
 
@@ -15,7 +15,6 @@ subscription_api = APIRouter(
 @subscription_api.post(
     "/create",
     response_model=SubscriptionAPI,
-    response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_subscription(
@@ -24,3 +23,20 @@ async def create_subscription(
     with db.tx():
         created_subscription = db.create(Subscription(data=subscription_data.to_dict()))
     return SubscriptionAPI.from_db(created_subscription)
+
+
+@subscription_api.post(
+    "/create_with_user",
+    response_model=SubscriptionAPI,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_subscription_and_user(
+    payload: SubscriptionData,
+    db: DB = Depends(write),
+):
+    with db.tx():
+        subscription = Subscription(data=payload.to_dict())
+        owner = User(data={})
+        owner.plan = db.create(subscription)
+        db.create(owner)
+    return SubscriptionAPI.from_db(owner.plan)

@@ -2,7 +2,7 @@ from uuid import uuid4
 from enum import Enum, auto
 from contextlib import contextmanager
 
-from fastapi import Depends, Request
+from fastapi import Depends, Request, HTTPException
 from sqlalchemy.orm.session import Session as SessionLocal
 from sqlalchemy import delete, select, update
 from sqlalchemy.engine.result import ChunkedIteratorResult
@@ -32,7 +32,7 @@ class DB:
         if needed is Scope.READ:
             return
         if db.scope is not Scope.WRITE:
-            raise PermissionError("scope is read-only")
+            raise HTTPException(status_code=403, detail="Database scope is read-only")
 
     def create(self, payload: Base, flush: bool = True) -> Base:
         DB._check(self, Scope.WRITE)
@@ -88,21 +88,15 @@ class DB:
 
     @contextmanager
     def tx(self):
-        try:
-            with self.session.begin():
-                yield self
-        except Exception:
-            self.session.rollback()
-            raise
+        with self.session.begin():
+            yield self
+
 
 # Dependencies
 # ============
 async def get_db(request: Request):
     session: SessionLocal = getattr(request.state, "db")
-    try:
-        yield session
-    finally:
-        session.close()
+    yield session
 
 
 async def write(session: SessionLocal = Depends(get_db)) -> DB:

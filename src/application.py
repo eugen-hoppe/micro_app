@@ -11,6 +11,7 @@ app = FastAPI(
     title="Micro App API",
     description="App Development Template",
     version="1.0",
+    response_model_exclude_none=True,
 )
 
 
