@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class Data(BaseModel):
-    def db(self) -> dict:
+    def to_dict(self) -> dict:
         return self.model_dump(exclude_none=True)
 
 
@@ -15,10 +15,14 @@ class Shape(BaseModel):
     class Config:
         from_attributes = True
 
+    @classmethod
+    def from_db(cls, row):
+        return cls(**row.__dict__)
+
 
 class Update(BaseModel):
     id: int | None = None
-    alias: str
+    alias: str | None = None
     data: dict | None = None
 
     class Config:

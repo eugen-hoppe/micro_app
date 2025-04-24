@@ -16,19 +16,18 @@ subscription_api = APIRouter(
 
 
 @subscription_api.post(
-    "/subscription/data",
+    "/create",
     response_model=SubscriptionAPI,
     response_model_exclude_none=True,
 )
 async def create_subscription(
-    subscription_data: SubscriptionData,
-    db: DB = Depends(write),
+    subscription_data: SubscriptionData, db: DB = Depends(write)
 ):
     db_subscription = Subscription(
         alias=str(uuid4()),
         category=SubsriptionType.STANDARD,
-        data=subscription_data.db(),
+        data=subscription_data.to_dict(),
     )
     created_subscription = db.create(db_subscription)
-    return SubscriptionAPI(**created_subscription.__dict__)
+    return SubscriptionAPI.from_db(created_subscription)
 

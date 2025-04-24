@@ -1,12 +1,14 @@
 from src.db.generic import Shape, Data
+from src.db.categories import SubsriptionType
 
 
 class SubscriptionData(Data):
-    created_at: str
+    year: int
+    category: SubsriptionType = SubsriptionType.STANDARD.value
 
 
 class SubscriptionAPI(Shape):
-    data: dict
+    members: list[Shape] | None = None
 
     class Config:
         from_attributes = True
