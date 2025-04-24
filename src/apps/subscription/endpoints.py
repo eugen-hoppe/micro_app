@@ -38,5 +38,7 @@ async def create_subscription_and_user(
         subscription = Subscription(data=payload.to_dict())
         owner = User(data={})
         owner.plan = db.create(subscription)
+        owner.alias = owner.plan.alias
+        owner.memberships.append(subscription)
         db.create(owner)
     return SubscriptionAPI.from_db(owner.plan)

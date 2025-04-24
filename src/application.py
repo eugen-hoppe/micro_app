@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 
-from src.db.models import Base
+from src.db.generic import Base
 from src.apps.subscription.endpoints import subscription_api
 
 
