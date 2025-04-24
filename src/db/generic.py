@@ -1,4 +1,10 @@
+from enum import Enum
+
 from pydantic import BaseModel
+from sqlalchemy.orm import relationship
+from sqlalchemy.orm.relationships import Relationship
+from sqlalchemy.orm.properties import MappedColumn
+from sqlalchemy.sql.schema import Table
 
 
 class Data(BaseModel):
@@ -27,3 +33,30 @@ class Update(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class OneToManyGeneric(Enum):
+    @staticmethod
+    def back_populates(to: "Enum", kwargs: dict = {}) -> Relationship:
+        return relationship(**kwargs, back_populates=to.name.lower())
+
+    def by(self, column: MappedColumn) -> Relationship:
+        return OneToManyGeneric.back_populates(self, kwargs={"foreign_keys": [column]})
+
+    def entity(self) -> Relationship:
+        return OneToManyGeneric.back_populates(self)
+
+
+class ManyGeneric(Enum):
+    def over(self, table: Table) -> Relationship:
+        return OneToManyGeneric.back_populates(self, kwargs={"secondary": table})
+
+
+class OneGeneric(Enum):
+    def by(self, column: MappedColumn) -> Relationship:
+        return OneToManyGeneric.back_populates(
+            self, kwargs={"foreign_keys": [column], "uselist": False}
+        )
+
+    def entity(self) -> Relationship:
+        return OneToManyGeneric.back_populates(self)
