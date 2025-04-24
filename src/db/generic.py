@@ -50,7 +50,7 @@ class Shape(BaseModel):
 
     @classmethod
     def from_db(cls, row):
-        return cls(**row.__dict__)
+        return cls.model_validate(row, from_attributes=True)
 
 
 class Update(BaseModel):
