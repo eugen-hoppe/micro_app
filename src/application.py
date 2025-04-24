@@ -6,6 +6,7 @@ from sqlalchemy.orm.session import Session
 from src.db.generic import Base
 from src.apps.subscription.endpoints import subscription_api
 from src.apps.user.endpoints import user_api
+from src.settings.conf import DATABASE_URL, PREFIX
 
 
 app = FastAPI(
@@ -16,16 +17,15 @@ app = FastAPI(
 )
 
 
-sql_url = "sqlite:///./sql_app.db"
-engine = create_engine(url=sql_url)
+engine = create_engine(url=DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 Base.metadata.create_all(bind=engine)
 
 
-app.include_router(subscription_api, prefix="/api")
-app.include_router(user_api, prefix="/api")
+app.include_router(subscription_api, prefix=PREFIX)
+app.include_router(user_api, prefix=PREFIX)
 
 
 @app.middleware("http")
