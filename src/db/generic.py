@@ -9,11 +9,21 @@ from sqlalchemy.sql.schema import Table
 from src.db import models
 
 
+# Database
+# ========
+# TODO
+
+
+
+# Payload
+# =======
 class Data(BaseModel):
     def to_dict(self) -> dict:
         return self.model_dump(exclude_none=True)
 
 
+# CRUD
+# ====
 class Shape(BaseModel):
     id: int
     alias: str
@@ -37,6 +47,8 @@ class Update(BaseModel):
         from_attributes = True
 
 
+# Relations
+# =========
 class OneToManyGeneric(Enum):
     @staticmethod
     def back_populates(to: "Enum", kwargs: dict = {}) -> Relationship:

@@ -10,17 +10,14 @@ from src.db.generic import OneToManyGeneric, ManyGeneric, OneGeneric
 
 
 class OneToMany(OneToManyGeneric):
-    SUBSCRIPTION = auto()  # 1
-    SUBSCRIPTIONS = auto()  # n
-    USER = auto()  # 1
-    USERS = auto()  # n
-    ACCOUNT = auto()  # 1
-    ACCOUNTS = auto()  # n
+    SUBSCRIPTION = auto()  # . 1
+    ACCOUNTS = auto()  # .     n
+    # ACCCOUNT, ... add more
 
 
 class Many(ManyGeneric):
-    MEMBERSHIPS = auto()  # n
-    MEMBERS = auto()  # n
+    MEMBERSHIPS = auto()  # . n
+    MEMBERS = auto()  # .     n
 
     @staticmethod
     def to_one() -> "OneToMany":
@@ -28,8 +25,8 @@ class Many(ManyGeneric):
 
 
 class One(OneGeneric):
-    PLAN = auto()  # 1
-    OWNER = auto()  # 1
+    PLAN = auto()  # .  1
+    OWNER = auto()  # . 1
 
     @staticmethod
     def to_many() -> "OneToMany":
