@@ -6,6 +6,8 @@ from sqlalchemy.orm.relationships import Relationship
 from sqlalchemy.orm.properties import MappedColumn
 from sqlalchemy.sql.schema import Table
 
+from src.db import models
+
 
 class Data(BaseModel):
     def to_dict(self) -> dict:
@@ -51,6 +53,10 @@ class ManyGeneric(Enum):
     def over(self, table: Table) -> Relationship:
         return OneToManyGeneric.back_populates(self, kwargs={"secondary": table})
 
+    @classmethod
+    def to_many(cls) -> "models.Many":
+        return cls
+
 
 class OneGeneric(Enum):
     def by(self, column: MappedColumn) -> Relationship:
@@ -60,3 +66,7 @@ class OneGeneric(Enum):
 
     def entity(self) -> Relationship:
         return OneToManyGeneric.back_populates(self)
+
+    @classmethod
+    def to_one(cls) -> "models.One":
+        return cls

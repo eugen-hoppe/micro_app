@@ -1,6 +1,6 @@
 from enum import auto
 
-from sqlalchemy import JSON, Boolean, Column, Enum, ForeignKey, Integer, String, Table
+from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.properties import MappedColumn
 from sqlalchemy.ext.declarative import declared_attr
@@ -23,10 +23,6 @@ class Many(ManyGeneric):
     MEMBERS = auto()  # n
 
     @staticmethod
-    def to_many() -> "Many":
-        return Many
-
-    @staticmethod
     def to_one() -> "OneToMany":
         return OneToMany
 
@@ -36,13 +32,8 @@ class One(OneGeneric):
     OWNER = auto()  # 1
 
     @staticmethod
-    def to_one() -> "One":
-        return One
-
-    @staticmethod
     def to_many() -> "OneToMany":
         return OneToMany
-
 
 
 class Base(DeclarativeBase):
