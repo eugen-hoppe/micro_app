@@ -11,9 +11,6 @@ from sqlalchemy.orm import DeclarativeBase, mapped_column
 from sqlalchemy.ext.declarative import declared_attr
 
 
-from src.db import models
-
-
 # Database
 # ========
 class Base(DeclarativeBase):
@@ -83,10 +80,6 @@ class ManyGeneric(Enum):
     def over(self, table: Table) -> Relationship:
         return EntityRelation.back_populates(self, kwargs={"secondary": table})
 
-    @classmethod
-    def to_many(cls) -> "models.Many":
-        return cls
-
 
 class OneGeneric(Enum):
     def by(self, column: MappedColumn) -> Relationship:
@@ -96,7 +89,3 @@ class OneGeneric(Enum):
 
     def entity(self) -> Relationship:
         return EntityRelation.back_populates(self)
-
-    @classmethod
-    def to_one(cls) -> "models.One":
-        return cls

@@ -4,38 +4,12 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import Mapped
 from sqlalchemy.schema import UniqueConstraint
 
-from src.db.generic import EntityRelation, ManyGeneric, OneGeneric, Base
+from src.db.generic import Base
+from src.db.relations import Many, One
 
 
-# Relation Definition
-# ===================
-class ToOne(EntityRelation):
-    SUBSCRIPTION = auto()
-
-class ToMany(EntityRelation):
-    ACCOUNTS = auto()
-
-
-class Many(ManyGeneric):
-    MEMBERSHIPS = auto()
-    MEMBERS = auto()
-
-    @staticmethod
-    def to_one() -> "ToOne":
-        return ToOne
-
-
-class One(OneGeneric):
-    PLAN = auto()
-    OWNER = auto()
-
-    @staticmethod
-    def to_many() -> "ToMany":
-        return ToMany
-
-
-# Many-To-Many Relations
-# ======================
+# Many-To-Many
+# ============
 membership = Table(
     "membership",
     Base.metadata,
@@ -48,8 +22,8 @@ membership = Table(
 )
 
 
-# Database Entities
-# =================
+# DB Tables
+# =========
 class Subscription(Base):
     owner: Mapped["User"] = One.to_one().PLAN.entity()
     accounts: Mapped[list["Account"]] = Many.to_one().SUBSCRIPTION.entity()
