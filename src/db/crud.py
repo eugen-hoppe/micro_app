@@ -12,11 +12,14 @@ from src.db.models import Base
 from src.db.generic import Update
 
 
-# CRUD
-# ====
 class Scope(Enum):
     READ = auto()
     WRITE = auto()
+
+
+async def get_db(request: Request):
+    session: SessionLocal = getattr(request.state, "db")
+    yield session
 
 
 class DB:
@@ -93,17 +96,8 @@ class DB:
         with self.session.begin():
             yield self
 
-
-# Dependencies
-# ============
-async def get_db(request: Request):
-    session: SessionLocal = getattr(request.state, "db")
-    yield session
-
-
-async def write(session: SessionLocal = Depends(get_db)) -> DB:
-    return DB(session, scope=Scope.WRITE)
-
-
-async def read(session: SessionLocal = Depends(get_db)) -> DB:
-    return DB(session)
+    @staticmethod
+    def dependency(scope: Scope = Scope.READ):
+        async def _dependency(session: SessionLocal = Depends(get_db)) -> "DB":
+            return DB(session, scope=scope)
+        return Depends(_dependency)
