@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi_htmx import htmx, htmx_init
 
-from src.apps.user.endpoints import get_user
+from src.apps.user.crud import get_user
 from src.db.crud import DB, read
 
 

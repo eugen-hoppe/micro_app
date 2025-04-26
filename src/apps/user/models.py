@@ -1,4 +1,3 @@
-from pydantic import BaseModel, Field
 from src.db.generic import Data, Shape
 
 
