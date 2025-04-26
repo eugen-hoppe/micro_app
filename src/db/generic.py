@@ -1,57 +1,42 @@
+from __future__ import annotations
+
+from typing import Any
+
 from pydantic import BaseModel
-from sqlalchemy import JSON, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import DeclarativeBase, mapped_column
-from sqlalchemy.orm.properties import MappedColumn
-from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy import JSON, Integer, String
+from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, declared_attr
 
 
-# Database
-# ========
 class Base(DeclarativeBase):
-    """Base class for all database models"""
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    alias = Column(String(64), unique=True, index=True, default=None)
-    version = Column(Integer, default=1)
-    data = Column(JSON, default=dict)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    alias: Mapped[str | None] = mapped_column(String(64), unique=True, index=True)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
     @declared_attr
-    def __tablename__(cls: "Base") -> str:
+    def __tablename__(cls) -> str:
         return cls.__name__.lower()
 
-    @staticmethod
-    def foreign_key(column: Column, ondelete: str = "CASCADE") -> MappedColumn:
-        """Create a foreign key constraint on the given column"""
-        return mapped_column(ForeignKey(column, ondelete=ondelete))
 
-
-# Payload
-# =======
 class Data(BaseModel):
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return self.model_dump(exclude_none=True)
 
 
-# CRUD
-# ====
 class Shape(BaseModel):
     id: int
-    alias: str
-    data: dict
+    alias: str | None
+    data: dict[str, Any]
     version: int
 
     class Config:
         from_attributes = True
 
-    @classmethod
-    def from_db(cls, row: type[Base]):
-        return cls.model_validate(row, from_attributes=True)
-
 
 class Update(BaseModel):
     id: int | None = None
     alias: str | None = None
-    data: dict | None = None
+    data: dict[str, Any] | None = None
 
     class Config:
         from_attributes = True

@@ -1,4 +1,6 @@
-from src.db.generic import Shape, Data
+from __future__ import annotations
+
+from src.db.generic import Data, Shape
 
 
 class SubscriptionData(Data):

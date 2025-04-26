@@ -1,45 +1,41 @@
+from __future__ import annotations
+
 from fastapi import APIRouter, status
 
 from src.apps.subscription.models import SubscriptionAPI, SubscriptionData
+from src.db.database import DB
 from src.db.models import Subscription, User
-from src.db.crud import DB
 
 
 subscription_api = APIRouter(
     prefix="/subscription",
-    responses={404: {"description": "Not found"}},
     tags=["plan"],
+    responses={404: {"description": "Not found"}},
 )
 
-
 @subscription_api.post(
-    "/create",
-    response_model=SubscriptionAPI,
-    status_code=status.HTTP_201_CREATED,
+    "/", response_model=SubscriptionAPI, status_code=status.HTTP_201_CREATED
 )
 async def create_subscription(
-    subscription_data: SubscriptionData,
-    db: DB = DB.dependency(DB.w),
-):
-    with db.tx():
-        created_subscription = db.create(Subscription(data=subscription_data.to_dict()))
-    return SubscriptionAPI.from_db(created_subscription)
-
-
-@subscription_api.post(
-    "/create_with_user",
-    response_model=SubscriptionAPI,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_subscription_and_user(
     payload: SubscriptionData,
     db: DB = DB.dependency(DB.w),
 ):
-    with db.tx():
-        subscription = Subscription(data=payload.to_dict())
-        owner = User(data={"name": "John"})
-        owner.plan = db.create(subscription)
-        owner.alias = owner.plan.alias
-        owner.memberships.append(subscription)
-        db.create(owner)
-    return SubscriptionAPI.from_db(owner.plan)
+    async with db.tx():
+        subscription = await db.create(Subscription(data=payload.to_dict()))
+
+    return SubscriptionAPI(**subscription.__dict__)
+
+
+@subscription_api.post(
+    "/with-owner",
+    response_model=SubscriptionAPI,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_subscription_with_owner(
+    payload: SubscriptionData,
+    db: DB = DB.dependency(DB.w),
+):
+    async with db.tx():
+        subscription = await db.create(Subscription(data=payload.to_dict()))
+        await db.create(User(data={"name": "John"}, plan=subscription))
+    return SubscriptionAPI(**subscription.__dict__)

@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from fastapi import APIRouter
 
-from src.apps.user.models import UserData
 from src.apps.user.crud import get_user
-from src.db.crud import DB
+from src.apps.user.models import UserAPI
+from src.db.database import DB
 
 
 user_api = APIRouter(
@@ -12,6 +14,6 @@ user_api = APIRouter(
 )
 
 
-@user_api.get("/{id_or_alias}", response_model=UserData)
+@user_api.get("/{id_or_alias}", response_model=UserAPI)
 async def api_get_user(id_or_alias: str, db: DB = DB.dependency()):
-    return UserData(**get_user(id_or_alias, db=db).data)
+    return await get_user(id_or_alias, db=db)

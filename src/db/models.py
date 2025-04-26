@@ -1,12 +1,12 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, Table
-from sqlalchemy.orm import Mapped, relationship, mapped_column
+from __future__ import annotations
+
+from sqlalchemy import Boolean, ForeignKey, Table, Column, Integer
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.schema import UniqueConstraint
 
 from src.db.generic import Base
 
 
-# Many-To-Many
-# ============
 membership = Table(
     "membership",
     Base.metadata,
@@ -19,49 +19,35 @@ membership = Table(
 )
 
 
-# DB Tables
-# =========
 class Subscription(Base):
     owner: Mapped["User"] = relationship(
-        "User",
-        back_populates="plan",
-        uselist=False,
-        cascade="all, delete-orphan",
+        back_populates="plan", uselist=False, cascade="all, delete-orphan"
     )
     accounts: Mapped[list["Account"]] = relationship(
-        "Account",
-        back_populates="subscription",
-        cascade="all, delete-orphan",
+        back_populates="subscription", cascade="all, delete-orphan"
     )
     members: Mapped[list["User"]] = relationship(
-        "User",
-        secondary=membership,
-        back_populates="memberships",
+        secondary=membership, back_populates="memberships"
     )
 
 
 class User(Base):
-    subscription_id: Mapped[int] = mapped_column(
+    subscription_id: Mapped[int | None] = mapped_column(
         ForeignKey("subscription.id", ondelete="CASCADE")
     )
     plan: Mapped["Subscription"] = relationship(
-        "Subscription",
-        back_populates="owner",
-        uselist=False,
+        back_populates="owner", uselist=False
     )
     memberships: Mapped[list["Subscription"]] = relationship(
-        "Subscription",
-        secondary=membership,
-        back_populates="members",
+        secondary=membership, back_populates="members"
     )
 
 
 class Account(Base):
-    active = Column(Boolean, default=False)
+    active: Mapped[bool] = mapped_column(Boolean, default=False)
     subscription_id: Mapped[int] = mapped_column(
         ForeignKey("subscription.id", ondelete="CASCADE")
     )
     subscription: Mapped["Subscription"] = relationship(
-        "Subscription",
-        back_populates="accounts",
+        back_populates="accounts"
     )
