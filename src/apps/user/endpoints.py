@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from src.apps.user.models import UserData
 from src.apps.user.crud import get_user

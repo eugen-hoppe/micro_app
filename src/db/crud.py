@@ -25,10 +25,12 @@ async def get_db(request: Request):
 class DB:
     session: Session
     scope: Scope
+    r: Scope = Scope.READ
+    w: Scope = Scope.WRITE
 
     def __init__(self, session: Session, scope: Scope = Scope.READ) -> None:
-        self.session = session
-        self.scope = scope
+        self.session: Session = session
+        self.scope: Scope = scope
 
     @staticmethod
     def _check(db: "DB", needed: Scope) -> None:
