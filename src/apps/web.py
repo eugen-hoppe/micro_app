@@ -9,6 +9,9 @@ from src.apps.user.crud import get_user
 from src.db.crud import DB
 
 
+LOG = True
+
+
 web_app = APIRouter(tags=["htmx"])
 htmx_init(templates=Jinja2Templates(directory=Path("src") / "templates"))
 
@@ -16,12 +19,16 @@ htmx_init(templates=Jinja2Templates(directory=Path("src") / "templates"))
 @web_app.get("/", response_class=HTMLResponse)
 @htmx("index", "index")
 async def root_page(request: Request):
+    if LOG:
+        print(request.cookies)
     return {"greeting": "Hello World"}
 
 
 @web_app.get("/users", response_class=HTMLResponse)
 @htmx("users")
 async def get_users(request: Request, db: DB = DB.dependency()):
+    if LOG:
+        print(request.headers["hx-target"])
     max = 1
     users = [get_user(str(id), db).data.get("name", "404") for id in range(1, max + 1)]
     return {"users": users}

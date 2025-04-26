@@ -2,7 +2,7 @@ from fastapi import APIRouter, status
 
 from src.apps.subscription.models import SubscriptionAPI, SubscriptionData
 from src.db.models import Subscription, User
-from src.db.crud import DB, Scope
+from src.db.crud import DB
 
 
 subscription_api = APIRouter(
