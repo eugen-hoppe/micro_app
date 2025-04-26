@@ -1,64 +1,59 @@
 from __future__ import annotations
+from typing import AsyncGenerator
 
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from fastcrud import crud_router
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.core.conf import settings
+from src.core.database import engine, Base, get_session
+from src.models.subscription import Subscription
+from src.models.user import User
+from src.schemas.subscription import SubscriptionCreate, SubscriptionUpdate
+from src.schemas.user import UserCreate, UserUpdate
+from src.core.web import web_app
 
 
-from src.apps.subscription.endpoints import subscription_api
-from src.apps.user.endpoints import user_api
-from src.apps.web import web_app
-from src.db.generic import Base
-from src.settings.conf import DATABASE_URL, PREFIX
 
-
-engine = create_async_engine(DATABASE_URL, echo=False)
-AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, autoflush=False)
-
-
-async def _ensure_schema_exists() -> None:
+async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await _ensure_schema_exists()
     yield
 
 
 app = FastAPI(
-    title="Micro App API",
-    description="App Development Template (refactored)",
-    version="1.1.0",
-    response_model_exclude_none=True,
+    title="Micro App API – FastCRUD edition",
+    description="Refactor using FastCRUD for generic CRUD ops",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_origins=settings.CORS_ORIGINS,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
+subscription_router = crud_router(
+    session=get_session,
+    model=Subscription,
+    create_schema=SubscriptionCreate,
+    update_schema=SubscriptionUpdate,
+    path=f"{settings.API_PREFIX}/subscription",
+    tags=["plan"],
+)
 
-@app.middleware("http")
-async def db_session_middleware(request: Request, call_next):
-    async with AsyncSessionLocal() as session:
-        request.state.db = session
-        try:
-            response = await call_next(request)
-            await session.commit()
-            return response
-        except Exception:
-            await session.rollback()
-            raise
+user_router = crud_router(
+    session=get_session,
+    model=User,
+    create_schema=UserCreate,
+    update_schema=UserUpdate,
+    path=f"{settings.API_PREFIX}/user",
+    tags=["user"],
+)
 
-
-app.include_router(subscription_api, prefix=PREFIX)
-app.include_router(user_api, prefix=PREFIX)
+app.include_router(subscription_router)
+app.include_router(user_router)
 app.include_router(web_app)
